@@ -330,3 +330,48 @@ function switchTab(tabName, button) {
 function capitalizeFirst(str) {
     return str.charAt(0).toUpperCase() + str.slice(1);
 }
+
+/**
+ * Creates a template for error notifications
+ * @param {string} message - The error message to display
+ * @returns {string} HTML string for the error notification
+ */
+function createErrorNotificationTemplate(message) {
+    return `
+        <div class="error-notification" style="
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: #ff4444;
+            color: white;
+            padding: 1rem;
+            border-radius: 8px;
+            z-index: 3000;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+        ">
+            ${message}
+        </div>
+    `;
+}
+
+/**
+ * Shows an error message as notification
+ * @param {string} message - The error message to display
+ * @returns {void}
+ */
+function showError(message) {
+    // Create error notification using template
+    const errorHTML = createErrorNotificationTemplate(message);
+    const tempDiv = document.createElement('div');
+    tempDiv.innerHTML = errorHTML;
+    const errorDiv = tempDiv.firstElementChild;
+    
+    document.body.appendChild(errorDiv);
+    
+    // Remove notification after 5 seconds
+    setTimeout(() => {
+        if (errorDiv && errorDiv.parentNode) {
+            errorDiv.remove();
+        }
+    }, 5000);
+}
