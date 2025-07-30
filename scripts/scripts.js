@@ -206,3 +206,81 @@ function getRegionPokemonIds() {
     }
     return ids;
 }
+
+// ============================================================================
+// POKEMON LOADING FUNCTIONS
+// ============================================================================
+
+/**
+ * Loads Pokemon for the current region
+ * @async
+ * @returns {Promise<void>}
+ */
+async function loadPokemon() {
+    try {
+        isLoading = true;
+        updateLoadMoreButton(true);
+
+        // Load Pokemon IDs for the selected region
+        const pokemonIds = getRegionPokemonIds();
+        const startIndex = currentOffset;
+        const endIndex = Math.min(startIndex + limit, pokemonIds.length);
+        
+        // Load Pokemon within the current batch
+        for (let i = startIndex; i < endIndex; i++) {
+            const pokemonId = pokemonIds[i];
+            const pokemonData = await fetchPokemonById(pokemonId);
+            
+            if (isValidPokemonData(pokemonData)) {
+                pokemonList.push(pokemonData);
+                renderPokemonCard(pokemonData);
+            }
+        }
+
+        currentOffset += limit;
+        
+        // Hide load more button if we've loaded all Pokemon in the region
+        if (endIndex >= pokemonIds.length) {
+            updateLoadMoreButton(false, true); // true = hide completely
+        } else {
+            updateLoadMoreButton(false, false); // false = show normally
+        }
+    } catch (error) {
+        const errorMessage = handleAPIError(error, 'loadPokemon');
+        showError(errorMessage);
+    } finally {
+        isLoading = false;
+        if (currentOffset < getRegionPokemonIds().length) {
+            updateLoadMoreButton(false, false);
+        }
+    }
+}
+
+/**
+ * Loads more Pokemon
+ * @async
+ * @returns {Promise<void>}
+ */
+async function loadMorePokemon() {
+    if (isLoading || isInSearchMode) return;
+    await loadPokemon();
+}
+
+/**
+ * Renders a Pokemon card in the grid
+ * @param {Object} pokemon - Pokemon data object
+ * @returns {void}
+ */
+function renderPokemonCard(pokemon) {
+    const pokemonGrid = document.getElementById('pokemonGrid');
+    
+    const cardElement = document.createElement('div');
+    cardElement.innerHTML = createPokemonCardTemplate(pokemon, getTypeColors());
+    
+    const card = cardElement.firstElementChild;
+    
+    // Add click event for large view
+    card.addEventListener('click', () => openLargeView(pokemon));
+    
+    pokemonGrid.appendChild(card);
+}
