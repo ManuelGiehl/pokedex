@@ -403,3 +403,137 @@ function resetToDefaultView() {
     updateLoadMoreButton(false, false);
     loadPokemon();
 }
+
+// ============================================================================
+// MODAL FUNCTIONS
+// ============================================================================
+
+/**
+ * Opens the large view for a Pokemon
+ * @param {Object} pokemon - Pokemon data object
+ * @returns {void}
+ */
+function openLargeView(pokemon) {
+    currentPokemonIndex = pokemonList.findIndex(p => p.id === pokemon.id);
+    renderLargeView(pokemon);
+}
+
+/**
+ * Renders the large view for a Pokemon
+ * @param {Object} pokemon - Pokemon data object
+ * @returns {void}
+ */
+function renderLargeView(pokemon) {
+    // Create overlay
+    const overlay = document.createElement('div');
+    overlay.className = 'large-view-overlay';
+    overlay.id = 'largeViewOverlay';
+    
+    overlay.innerHTML = createLargeViewTemplate(pokemon, getTypeColors());
+
+    // Close overlay when clicking outside
+    overlay.addEventListener('click', (e) => {
+        if (e.target === overlay) {
+            closeLargeView();
+        }
+    });
+
+    document.body.appendChild(overlay);
+    document.body.style.overflow = 'hidden';
+}
+
+/**
+ * Closes the large view
+ * @returns {void}
+ */
+function closeLargeView() {
+    const overlay = document.getElementById('largeViewOverlay');
+    if (overlay) {
+        overlay.remove();
+        document.body.style.overflow = '';
+        document.body.style.position = '';
+    }
+}
+
+/**
+ * Navigates between Pokemon in the large view
+ * @param {number} direction - Direction (-1 for previous, 1 for next)
+ * @returns {void}
+ */
+function navigatePokemon(direction) {
+    const newIndex = currentPokemonIndex + direction;
+    if (newIndex >= 0 && newIndex < pokemonList.length) {
+        currentPokemonIndex = newIndex;
+        const overlay = document.getElementById('largeViewOverlay');
+        if (overlay) {
+            overlay.remove();
+            renderLargeView(pokemonList[currentPokemonIndex]);
+        }
+    }
+}
+
+/**
+ * Shows a custom modal
+ * @param {string} message - The message to display
+ * @returns {void}
+ */
+function showCustomModal(message) {
+    const modal = document.getElementById('customModal');
+    const modalMessage = document.getElementById('modalMessage');
+    
+    if (modal && modalMessage) {
+        modalMessage.textContent = message;
+        modal.style.display = 'flex';
+    }
+}
+
+/**
+ * Closes the custom modal
+ * @returns {void}
+ */
+function closeCustomModal() {
+    const modal = document.getElementById('customModal');
+    if (modal) {
+        modal.style.display = 'none';
+    }
+}
+
+/**
+ * Wrapper function for the X button in modal
+ * @returns {void}
+ */
+function closeLargeViewButton() {
+    closeLargeView();
+}
+
+// ============================================================================
+// UI FUNCTIONS
+// ============================================================================
+
+/**
+ * Clears the Pokemon grid
+ * @returns {void}
+ */
+function clearPokemonGrid() {
+    const pokemonGrid = document.getElementById('pokemonGrid');
+    pokemonGrid.innerHTML = '';
+}
+
+/**
+ * Updates the "Load More" button
+ * @param {boolean} isLoading - Indicates if currently loading
+ * @param {boolean} hideCompletely - Indicates if button should be completely hidden
+ * @returns {void}
+ */
+function updateLoadMoreButton(isLoading, hideCompletely = false) {
+    const loadMoreBtn = document.getElementById('loadMoreBtn');
+    if (loadMoreBtn) {
+        if (isInSearchMode || hideCompletely) {
+            loadMoreBtn.style.display = 'none';
+        } else {
+            loadMoreBtn.style.display = 'block';
+            loadMoreBtn.disabled = isLoading;
+            loadMoreBtn.textContent = isLoading ? 'Loading...' : 'Load More Pokemon';
+        }
+    }
+}
