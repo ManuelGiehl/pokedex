@@ -3,9 +3,52 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Pokedex</title>
+    <title>Pokedex </title>
+    <link rel="icon" type="image/png" href="assets/img/pokeball.png">
+    <link rel="stylesheet" href="styles/styles.css">
+    <link rel="stylesheet" href="styles/poke.css">
+    <link rel="stylesheet" href="styles/landing.css">
+    <script src="scripts/api.js" defer></script>
+    <script src="scripts/db.js" defer></script>
+    <script src="scripts/template.js" defer></script>
+    <script src="scripts/scripts.js" defer></script>
 </head>
 <body>
-    
+   
+    <section id="landingPage" class="landing-page">
+        <div class="landing-background"></div>
+        
+        <section id="initialPokedexSection" class="initial-pokedex-section">
+            <div class="pokedex-image-container">
+                <img src="assets/img/pokedex-landing.png" alt="Pokedex" class="pokedex-landing-image">
+            </div>
+            <div class="landing-text">
+                <h1>Tap the Pokedex to begin your adventure</h1>
+            </div>
+        </section>
+        
+        <section id="regionSelectionSection" class="region-selection-section" style="display: none;">
+            <div class="region-text">
+                <h2>Choose the region you want to explore</h2>
+            </div>
+            
+            <div class="pokeball-container">
+                <div class="pokeball-item" data-region="kanto">
+                    <img src="assets/img/pokeball.png" alt="Kanto" class="pokeball-image">
+                    <span class="region-label">Kanto</span>
+                </div>
+                <div class="pokeball-item" data-region="johto">
+                    <img src="assets/img/pokeball.png" alt="Johto" class="pokeball-image">
+                    <span class="region-label">Johto</span>
+                </div>
+                <div class="pokeball-item" data-region="hoenn">
+                    <img src="assets/img/pokeball.png" alt="Hoenn" class="pokeball-image">
+                    <span class="region-label">Hoenn</span>
+                </div>
+            </div>
+        </section>
+    </section>
+
+   
 </body>
 </html>
