@@ -49,6 +49,54 @@
         </section>
     </section>
 
+    <section id="mainContent" class="main-content-wrapper" style="display: none;">
+        <header class="header">
+            <div class="header-container">
+                <section class="logo-section">
+                    <div class="pokeball-icon">
+                        <div class="pokeball-top"></div>
+                        <div class="pokeball-center"></div>
+                        <div class="pokeball-bottom"></div>
+                    </div>
+                    <h1 class="logo-text">Pokedex</h1>
+                </section>
+                <section class="search-section">
+                    <div class="search-container">
+                        <input type="text" class="search-input" placeholder="Search for a Pokemon..." id="searchInput">
+                        <button class="search-button" type="button">
+                            <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <circle cx="11" cy="11" r="8"></circle>
+                                <path d="m21 21-4.35-4.35"></path>
+                            </svg>
+                        </button>
+                    </div>
+                </section>
+            </div>
+        </header>
+
+        <main class="main-content">
+            <section class="pokemon-section">
+                <div class="pokemon-grid" id="pokemonGrid">
+                    <!-- Pokemon cards will be dynamically inserted here -->
+                </div>
+            </section>
+            
+            <section class="load-more-section">
+                <div class="load-more-container">
+                    <button id="loadMoreBtn" class="load-more-btn">Load More Pokemon</button>
+                </div>
+            </section>
+        </main>
+
+        <footer class="footer">
+            <div class="footer-container">
+                <div class="footer-content">
+                    <p>&copy; 2025 Pokedex - by Manuel</p>
+                </div>
+            </div>
+        </footer>
+    </section>
+
    
 </body>
 </html>
