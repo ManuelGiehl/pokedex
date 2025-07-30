@@ -88,31 +88,4 @@ function handleAPIError(error, context) {
     }
 }
 
-/**
- * Shows an error message as notification
- * @param {string} message - The error message to display
- * @returns {void}
- */
-function showError(message) {
-    // Create a temporary error notification
-    const errorDiv = document.createElement('div');
-    errorDiv.className = 'error-notification';
-    errorDiv.textContent = message;
-    errorDiv.style.cssText = `
-        position: fixed;
-        top: 20px;
-        right: 20px;
-        background: #ff4444;
-        color: white;
-        padding: 1rem;
-        border-radius: 8px;
-        z-index: 3000;
-        box-shadow: 0 4px 12px rgba(0,0,0,0.3);
-    `;
-    
-    document.body.appendChild(errorDiv);
-    
-    setTimeout(() => {
-        errorDiv.remove();
-    }, 5000);
-}
+
