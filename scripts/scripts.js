@@ -3,6 +3,10 @@
  * @fileoverview Main logic for the Pokedex application
  */
 
+// ============================================================================
+// GLOBAL VARIABLES
+// ============================================================================
+
 /** @type {Array<Object>} List of all loaded Pokemon */
 let pokemonList = [];
 /** @type {number} Current offset for loading Pokemon */
@@ -22,6 +26,9 @@ let regionStart = 1;
 /** @type {number} End ID of current region */
 let regionEnd = 151;
 
+// ============================================================================
+// INITIALIZATION
+// ============================================================================
 
 // Initialize Pokedex when DOM is loaded
 document.addEventListener('DOMContentLoaded', function() {
@@ -43,6 +50,10 @@ async function init() {
         await loadPokemon();
     }
 }
+
+// ============================================================================
+// EVENT LISTENERS SETUP
+// ============================================================================
 
 /**
  * Sets up all event listeners for the application
@@ -75,6 +86,45 @@ function setupRegionSelectionListeners() {
 }
 
 /**
+ * Sets up event listeners for main content
+ * @returns {void}
+ */
+function setupMainContentListeners() {
+    const searchInput = document.getElementById('searchInput');
+    const searchButton = document.querySelector('.search-button');
+    const loadMoreBtn = document.getElementById('loadMoreBtn');
+
+    // Search functionality
+    if (searchButton) {
+        searchButton.addEventListener('click', handleSearch);
+    }
+    
+    if (searchInput) {
+        searchInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                handleSearch();
+            }
+        });
+
+        // Live search reset when input is cleared
+        searchInput.addEventListener('input', (e) => {
+            if (e.target.value.trim() === '' && isInSearchMode) {
+                resetToDefaultView();
+            }
+        });
+    }
+
+    // Load more button
+    if (loadMoreBtn) {
+        loadMoreBtn.addEventListener('click', loadMorePokemon);
+    }
+}
+
+// ============================================================================
+// LANDING PAGE FUNCTIONS
+// ============================================================================
+
+/**
  * Starts the Pokedex animation on the landing page
  * @returns {void}
  */
@@ -94,3 +144,65 @@ function startPokedexAnimation() {
     }, 500);
 }
 
+// ============================================================================
+// REGION SELECTION FUNCTIONS
+// ============================================================================
+
+/**
+ * Selects a region and loads the corresponding Pokemon
+ * @param {string} region - The selected region ('kanto', 'johto', 'hoenn')
+ * @returns {void}
+ */
+function selectRegion(region) {
+    const landingPage = document.getElementById('landingPage');
+    const mainContent = document.getElementById('mainContent');
+    
+    if (!landingPage || !mainContent) return;
+
+    // Store selected region and set region-specific limits
+    selectedRegion = region;
+    setRegionLimits(region);
+
+    // Reset Pokemon list and offset for new region
+    pokemonList = [];
+    currentOffset = 0;
+    clearPokemonGrid();
+
+    // Fade out the landing page
+    landingPage.style.display = 'none';
+    mainContent.style.display = 'block';
+    
+    // Setup main content and load Pokemon
+    setupMainContentListeners();
+    updateLoadMoreButton(false, false);
+    loadPokemon();
+}
+
+/**
+ * Sets the start and end IDs for the selected region
+ * @param {string} region - The selected region
+ * @returns {void}
+ */
+function setRegionLimits(region) {
+    const regionLimits = {
+        kanto: { start: 1, end: 151 },
+        johto: { start: 152, end: 251 },
+        hoenn: { start: 252, end: 386 }
+    };
+    
+    const limits = regionLimits[region] || regionLimits.kanto;
+    regionStart = limits.start;
+    regionEnd = limits.end;
+}
+
+/**
+ * Generates an array with Pokemon IDs for the current region
+ * @returns {Array<number>} Array with Pokemon IDs
+ */
+function getRegionPokemonIds() {
+    const ids = [];
+    for (let i = regionStart; i <= regionEnd; i++) {
+        ids.push(i);
+    }
+    return ids;
+}
