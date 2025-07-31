@@ -37,17 +37,16 @@ document.addEventListener('DOMContentLoaded', function() {
 
 /**
  * Initializes the Pokedex application
- * @async
- * @returns {Promise<void>}
+ * @returns {void}
  */
-async function init() {
+function init() {
     setupEventListeners();
     
     // Only load Pokemon if main content is visible (not on landing page)
     const mainContent = document.getElementById('mainContent');
     if (mainContent && mainContent.style.display !== 'none') {
         updateLoadMoreButton(false);
-        await loadPokemon();
+        loadPokemon();
     }
 }
 
@@ -211,60 +210,7 @@ function getRegionPokemonIds() {
 // POKEMON LOADING FUNCTIONS
 // ============================================================================
 
-/**
- * Loads Pokemon for the current region
- * @async
- * @returns {Promise<void>}
- */
-async function loadPokemon() {
-    try {
-        isLoading = true;
-        updateLoadMoreButton(true);
 
-        // Load Pokemon IDs for the selected region
-        const pokemonIds = getRegionPokemonIds();
-        const startIndex = currentOffset;
-        const endIndex = Math.min(startIndex + limit, pokemonIds.length);
-        
-        // Load Pokemon within the current batch
-        for (let i = startIndex; i < endIndex; i++) {
-            const pokemonId = pokemonIds[i];
-            const pokemonData = await fetchPokemonById(pokemonId);
-            
-            if (isValidPokemonData(pokemonData)) {
-                pokemonList.push(pokemonData);
-                renderPokemonCard(pokemonData);
-            }
-        }
-
-        currentOffset += limit;
-        
-        // Hide load more button if we've loaded all Pokemon in the region
-        if (endIndex >= pokemonIds.length) {
-            updateLoadMoreButton(false, true); // true = hide completely
-        } else {
-            updateLoadMoreButton(false, false); // false = show normally
-        }
-    } catch (error) {
-        const errorMessage = handleAPIError(error, 'loadPokemon');
-        showError(errorMessage);
-    } finally {
-        isLoading = false;
-        if (currentOffset < getRegionPokemonIds().length) {
-            updateLoadMoreButton(false, false);
-        }
-    }
-}
-
-/**
- * Loads more Pokemon
- * @async
- * @returns {Promise<void>}
- */
-async function loadMorePokemon() {
-    if (isLoading || isInSearchMode) return;
-    await loadPokemon();
-}
 
 /**
  * Renders a Pokemon card in the grid
@@ -289,84 +235,7 @@ function renderPokemonCard(pokemon) {
 // SEARCH FUNCTIONS
 // ============================================================================
 
-/**
- * Handles Pokemon search
- * @async
- * @returns {Promise<void>}
- */
-async function handleSearch() {
-    const searchInput = document.getElementById('searchInput');
-    const searchTerm = searchInput.value.trim();
-    
-    if (searchTerm === '') {
-        resetToDefaultView();
-        return;
-    }
-    
-    if (!isValidSearchTerm(searchTerm)) {
-        showCustomModal('Please enter a valid search term (letters, numbers, or spaces).');
-        return;
-    }
 
-    try {
-        const pokemon = await searchPokemonByTerm(searchTerm);
-        displaySearchResult(pokemon, searchTerm);
-    } catch (error) {
-        const errorMessage = handleAPIError(error, 'search');
-        showError(errorMessage);
-    }
-}
-
-/**
- * Searches Pokemon based on search term (ID or name)
- * @async
- * @param {string} searchTerm - The search term
- * @returns {Promise<Object>} Pokemon data object
- */
-async function searchPokemonByTerm(searchTerm) {
-    if (isPokemonId(searchTerm)) {
-        return await searchPokemonById(searchTerm);
-    } else {
-        return await searchPokemonByName(searchTerm);
-    }
-}
-
-/**
- * Searches Pokemon by ID
- * @async
- * @param {string} searchTerm - The Pokemon ID as string
- * @returns {Promise<Object>} Pokemon data object
- * @throws {Error} When Pokemon is not available in current region
- */
-async function searchPokemonById(searchTerm) {
-    const pokemonId = sanitizePokemonId(searchTerm);
-    
-    if (!isPokemonInCurrentRegion(pokemonId)) {
-        showCustomModal(`Pokemon #${pokemonId} is not available in the ${selectedRegion} region. Please search for Pokemon #${regionStart}-${regionEnd}.`);
-        throw new Error('Pokemon not in current region');
-    }
-    
-    return await fetchPokemonById(pokemonId);
-}
-
-/**
- * Searches Pokemon by name
- * @async
- * @param {string} searchTerm - The Pokemon name
- * @returns {Promise<Object>} Pokemon data object
- * @throws {Error} When Pokemon is not available in current region
- */
-async function searchPokemonByName(searchTerm) {
-    const sanitizedTerm = sanitizeSearchTerm(searchTerm);
-    const pokemon = await searchPokemon(sanitizedTerm);
-    
-    if (!isPokemonInCurrentRegion(pokemon.id)) {
-        showCustomModal(`Pokemon "${searchTerm}" is not available in the ${selectedRegion} region.`);
-        throw new Error('Pokemon not in current region');
-    }
-    
-    return pokemon;
-}
 
 /**
  * Checks if a Pokemon belongs to the current region
@@ -379,14 +248,22 @@ function isPokemonInCurrentRegion(pokemonId) {
 
 /**
  * Displays the search result
- * @param {Object} pokemon - Pokemon data object
+ * @param {Array<Object>|Object} pokemon - Pokemon data object(s)
  * @param {string} searchTerm - The original search term
  * @returns {void}
  */
 function displaySearchResult(pokemon, searchTerm) {
     saveSearchHistory(searchTerm);
     clearPokemonGrid();
-    renderPokemonCard(pokemon);
+    
+    // Handle both single Pokemon and array of Pokemon
+    const pokemonArray = Array.isArray(pokemon) ? pokemon : [pokemon];
+    
+    // Render all matching Pokemon
+    pokemonArray.forEach(pokemonData => {
+        renderPokemonCard(pokemonData);
+    });
+    
     isInSearchMode = true;
     updateLoadMoreButton(false);
 }
