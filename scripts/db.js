@@ -94,7 +94,4 @@ function handleAPIError(error, context) {
  * @returns {void}
  */
 function saveSearchHistory(searchTerm) {
-    // This function can be extended later to save search history
-    // For now, it's just a placeholder to prevent errors
-    console.log('Search term saved:', searchTerm);
 }
