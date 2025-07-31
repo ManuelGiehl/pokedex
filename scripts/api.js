@@ -57,16 +57,6 @@ async function searchPokemon(searchTerm) {
 }
 
 /**
- * Searches Pokemon by ID (alias for fetchPokemonById)
- * @async
- * @param {number} id - Pokemon ID
- * @returns {Promise<Object>} Pokemon data object
- */
-async function searchPokemonById(id) {
-    return fetchPokemonById(id);
-}
-
-/**
  * Searches Pokemon by term (ID or name)
  * @async
  * @param {string} searchTerm - The search term
@@ -137,7 +127,6 @@ async function searchPokemonByName(searchTerm) {
 async function loadPokemon() {
     try {
         isLoading = true;
-        updateLoadMoreButton(true);
 
         // Load Pokemon IDs for the selected region
         const pokemonIds = getRegionPokemonIds();
@@ -181,7 +170,20 @@ async function loadPokemon() {
  */
 async function loadMorePokemon() {
     if (isLoading || isInSearchMode) return;
-    await loadPokemon();
+    
+    // Show loading button state
+    showLoadingButton();
+    
+    try {
+        // Wait for 2 seconds minimum
+        await new Promise(resolve => setTimeout(resolve, 2000));
+        
+        // Load Pokemon
+        await loadPokemon();
+    } finally {
+        // Show normal button state
+        showNormalButton();
+    }
 }
 
 /**
@@ -210,6 +212,38 @@ async function handleSearch() {
         const errorMessage = handleAPIError(error, 'search');
         showError(errorMessage);
     }
+}
+
+/**
+ * Searches Pokemon by fuzzy name matching
+ * @async
+ * @param {string} searchTerm - The search term
+ * @param {Array<number>} pokemonIds - Array of Pokemon IDs to search through
+ * @returns {Promise<Array<Object>>} Array of matching Pokemon
+ */
+async function searchPokemonByFuzzyName(searchTerm, pokemonIds) {
+    const matchingPokemon = [];
+    
+    // Search through all Pokemon in the provided IDs
+    for (const pokemonId of pokemonIds) {
+        try {
+            const pokemon = await fetchPokemonById(pokemonId);
+            
+            // Check if Pokemon name contains the search term (case insensitive)
+            if (pokemon.name.toLowerCase().includes(searchTerm.toLowerCase())) {
+                matchingPokemon.push(pokemon);
+            }
+        } catch (error) {
+            // Skip Pokemon that can't be fetched
+            console.warn(`Could not fetch Pokemon ${pokemonId}:`, error);
+        }
+    }
+    
+    if (matchingPokemon.length === 0) {
+        throw new Error(`No Pokemon found matching "${searchTerm}"`);
+    }
+    
+    return matchingPokemon;
 }
 
 /**

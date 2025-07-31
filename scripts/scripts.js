@@ -1,5 +1,5 @@
 /**
- * Pokedex JavaScript with functional approach
+ * Pokedex JavaScript
  * @fileoverview Main logic for the Pokedex application
  */
 

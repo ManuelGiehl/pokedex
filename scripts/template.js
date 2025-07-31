@@ -35,7 +35,6 @@ function createPokemonCardTemplate(pokemon, typeColors) {
         </article>
     `;
 }
-
 /**
  * Creates a template for the large Pokemon view
  * @param {Object} pokemon - Pokemon data object
@@ -84,7 +83,6 @@ function createLargeViewTemplate(pokemon, typeColors) {
         </section>
     `;
 }
-
 /**
  * Creates the tab system for the large view
  * @param {Object} pokemon - Pokemon data object
@@ -114,7 +112,6 @@ function createTabSystem(pokemon) {
         </main>
     `;
 }
-
 /**
  * Creates the "About" tab content
  * @param {Object} pokemon - Pokemon data object
@@ -148,7 +145,6 @@ function createAboutTab(pokemon) {
         </dl>
     `;
 }
-
 /**
  * Creates the "Base Stats" tab content
  * @param {Object} pokemon - Pokemon data object
@@ -184,7 +180,6 @@ function createStatsTab(pokemon) {
         </section>
     `;
 }
-
 /**
  * Creates the "Evolution" tab content
  * @param {Object} pokemon - Pokemon data object
@@ -204,7 +199,6 @@ function createEvolutionTab(pokemon) {
         </dl>
     `;
 }
-
 /**
  * Creates the "Moves" tab content
  * @param {Object} pokemon - Pokemon data object
@@ -224,7 +218,6 @@ function createMovesTab(pokemon) {
         </dl>
     `;
 }
-
 /**
  * Creates a template for the "Load More" button
  * @param {boolean} isLoading - Indicates if currently loading
@@ -239,7 +232,32 @@ function createLoadMoreButtonTemplate(isLoading) {
         </section>
     `;
 }
-
+/**
+ * Creates a template for the loading button state
+ * @returns {string} HTML string for the loading button
+ */
+function createLoadingButtonTemplate() {
+    return `
+        <section class="load-more-container">
+            <div class="loading-button" style="
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                padding: 12px 24px;
+                background: #4a5568;
+                color: white;
+                border: none;
+                border-radius: 8px;
+                font-size: 16px;
+                font-weight: bold;
+                cursor: not-allowed;
+                opacity: 0.8;
+            ">
+                <span>Loading Pokemon...</span>
+            </div>
+        </section>
+    `;
+}
 /**
  * Creates a template for search results
  * @param {Object} pokemon - Pokemon data object
@@ -253,7 +271,6 @@ function createSearchResultTemplate(pokemon, typeColors) {
         </section>
     `;
 }
-
 /**
  * Creates a template for error modals
  * @param {string} message - The error message
@@ -277,7 +294,6 @@ function createErrorModalTemplate(message) {
         </section>
     `;
 }
-
 /**
  * Creates a template for region selection
  * @returns {string} HTML string for region selection
@@ -305,7 +321,6 @@ function createRegionSelectionTemplate() {
         </section>
     `;
 }
-
 /**
  * Switches between tabs in the large view
  * @param {string} tabName - Name of the tab to activate
@@ -321,7 +336,6 @@ function switchTab(tabName, button) {
     button.classList.add('active');
     document.getElementById(tabName + '-tab').classList.add('active');
 }
-
 /**
  * Capitalizes the first letter of a string
  * @param {string} str - The string to capitalize
@@ -330,7 +344,6 @@ function switchTab(tabName, button) {
 function capitalizeFirst(str) {
     return str.charAt(0).toUpperCase() + str.slice(1);
 }
-
 /**
  * Creates a template for error notifications
  * @param {string} message - The error message to display
@@ -353,7 +366,32 @@ function createErrorNotificationTemplate(message) {
         </div>
     `;
 }
-
+/**
+ * Shows loading state for the "Load More" button
+ * @returns {void}
+ */
+function showLoadingButton() {
+    const loadMoreSection = document.querySelector('.load-more-section');
+    if (loadMoreSection) {
+        loadMoreSection.innerHTML = createLoadingButtonTemplate();
+    }
+}
+/**
+ * Shows normal state for the "Load More" button
+ * @returns {void}
+ */
+function showNormalButton() {
+    const loadMoreSection = document.querySelector('.load-more-section');
+    if (loadMoreSection) {
+        loadMoreSection.innerHTML = createLoadMoreButtonTemplate(false);
+        
+        // Re-attach event listener
+        const loadMoreBtn = document.getElementById('loadMoreBtn');
+        if (loadMoreBtn) {
+            loadMoreBtn.addEventListener('click', loadMorePokemon);
+        }
+    }
+}
 /**
  * Shows an error message as notification
  * @param {string} message - The error message to display
