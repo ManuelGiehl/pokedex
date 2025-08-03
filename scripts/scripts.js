@@ -3,10 +3,6 @@
  * @fileoverview Main logic for the Pokedex application
  */
 
-// ============================================================================
-// GLOBAL VARIABLES
-// ============================================================================
-
 /** @type {Array<Object>} List of all loaded Pokemon */
 let pokemonList = [];
 /** @type {number} Current offset for loading Pokemon */
@@ -25,10 +21,6 @@ let selectedRegion = 'kanto';
 let regionStart = 1;
 /** @type {number} End ID of current region */
 let regionEnd = 151;
-
-// ============================================================================
-// INITIALIZATION
-// ============================================================================
 
 // Initialize Pokedex when DOM is loaded
 document.addEventListener('DOMContentLoaded', function() {
@@ -49,10 +41,6 @@ function init() {
         loadPokemon();
     }
 }
-
-// ============================================================================
-// EVENT LISTENERS SETUP
-// ============================================================================
 
 /**
  * Sets up all event listeners for the application
@@ -119,10 +107,6 @@ function setupMainContentListeners() {
     }
 }
 
-// ============================================================================
-// LANDING PAGE FUNCTIONS
-// ============================================================================
-
 /**
  * Starts the Pokedex animation on the landing page
  * @returns {void}
@@ -142,10 +126,6 @@ function startPokedexAnimation() {
         regionSection.style.display = 'flex';
     }, 500);
 }
-
-// ============================================================================
-// REGION SELECTION FUNCTIONS
-// ============================================================================
 
 /**
  * Selects a region and loads the corresponding Pokemon
@@ -206,12 +186,6 @@ function getRegionPokemonIds() {
     return ids;
 }
 
-// ============================================================================
-// POKEMON LOADING FUNCTIONS
-// ============================================================================
-
-
-
 /**
  * Renders a Pokemon card in the grid
  * @param {Object} pokemon - Pokemon data object
@@ -230,12 +204,6 @@ function renderPokemonCard(pokemon) {
     
     pokemonGrid.appendChild(card);
 }
-
-// ============================================================================
-// SEARCH FUNCTIONS
-// ============================================================================
-
-
 
 /**
  * Checks if a Pokemon belongs to the current region
@@ -280,10 +248,6 @@ function resetToDefaultView() {
     updateLoadMoreButton(false, false);
     loadPokemon();
 }
-
-// ============================================================================
-// MODAL FUNCTIONS
-// ============================================================================
 
 /**
  * Opens the large view for a Pokemon
@@ -382,10 +346,6 @@ function closeCustomModal() {
 function closeLargeViewButton() {
     closeLargeView();
 }
-
-// ============================================================================
-// UI FUNCTIONS
-// ============================================================================
 
 /**
  * Clears the Pokemon grid
