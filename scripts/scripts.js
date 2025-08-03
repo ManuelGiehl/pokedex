@@ -363,14 +363,13 @@ function clearPokemonGrid() {
  * @returns {void}
  */
 function updateLoadMoreButton(isLoading, hideCompletely = false) {
-    const loadMoreBtn = document.getElementById('loadMoreBtn');
-    if (loadMoreBtn) {
+    const loadMoreSection = document.querySelector('.load-more-section');
+    if (loadMoreSection) {
         if (isInSearchMode || hideCompletely) {
-            loadMoreBtn.style.display = 'none';
+            loadMoreSection.style.display = 'none';
         } else {
-            loadMoreBtn.style.display = 'block';
-            loadMoreBtn.disabled = isLoading;
-            loadMoreBtn.textContent = isLoading ? 'Loading...' : 'Load More Pokemon';
+            loadMoreSection.style.display = 'block';
+            showButtonState(isLoading);
         }
     }
 }

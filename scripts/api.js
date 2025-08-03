@@ -172,7 +172,7 @@ async function loadMorePokemon() {
     if (isLoading || isInSearchMode) return;
     
     // Show loading button state
-    showLoadingButton();
+    showButtonState(true);
     
     try {
         // Wait for 2 seconds minimum
@@ -182,7 +182,7 @@ async function loadMorePokemon() {
         await loadPokemon();
     } finally {
         // Show normal button state
-        showNormalButton();
+        showButtonState(false);
     }
 }
 
