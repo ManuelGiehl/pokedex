@@ -23,7 +23,6 @@ async function fetchPokemonById(id) {
         if (!response.ok) {
             throw new Error(`Pokemon with ID ${id} not found`);
         }
-        
         const data = await response.json();
         return data;
     } catch (error) {
@@ -46,8 +45,7 @@ async function searchPokemon(searchTerm) {
         
         if (!response.ok) {
             throw new Error(`Pokemon not found: ${searchTerm}`);
-        }
-        
+        }  
         const data = await response.json();
         return data;
     } catch (error) {
@@ -84,7 +82,6 @@ async function searchPokemonById(searchTerm) {
         showCustomModal(`Pokemon #${pokemonId} is not available in the ${selectedRegion} region. Please search for Pokemon #${regionStart}-${regionEnd}.`);
         throw new Error('Pokemon not in current region');
     }
-    
     return await fetchPokemonById(pokemonId);
 }
 
@@ -98,12 +95,10 @@ async function searchPokemonById(searchTerm) {
 async function searchPokemonByName(searchTerm) {
     const sanitizedTerm = sanitizeSearchTerm(searchTerm);
     
-    // If search term is 3 or more characters, use fuzzy search
     if (sanitizedTerm.length >= 3) {
         const pokemonIds = getRegionPokemonIds();
         return await searchPokemonByFuzzyName(sanitizedTerm, pokemonIds);
     } else {
-        // For shorter terms, try exact search first
         try {
             const pokemon = await searchPokemon(sanitizedTerm);
             if (!isPokemonInCurrentRegion(pokemon.id)) {
@@ -112,7 +107,6 @@ async function searchPokemonByName(searchTerm) {
             }
             return [pokemon];
         } catch (error) {
-            // If exact search fails, try fuzzy search even for short terms
             const pokemonIds = getRegionPokemonIds();
             return await searchPokemonByFuzzyName(sanitizedTerm, pokemonIds);
         }
@@ -128,12 +122,10 @@ async function loadPokemon() {
     try {
         isLoading = true;
 
-        // Load Pokemon IDs for the selected region
         const pokemonIds = getRegionPokemonIds();
         const startIndex = currentOffset;
         const endIndex = Math.min(startIndex + limit, pokemonIds.length);
         
-        // Load Pokemon within the current batch
         for (let i = startIndex; i < endIndex; i++) {
             const pokemonId = pokemonIds[i];
             const pokemonData = await fetchPokemonById(pokemonId);
@@ -146,11 +138,10 @@ async function loadPokemon() {
 
         currentOffset += limit;
         
-        // Hide load more button if we've loaded all Pokemon in the region
         if (endIndex >= pokemonIds.length) {
-            updateLoadMoreButton(false, true); // true = hide completely
+            updateLoadMoreButton(false, true); 
         } else {
-            updateLoadMoreButton(false, false); // false = show normally
+            updateLoadMoreButton(false, false); 
         }
     } catch (error) {
         const errorMessage = handleAPIError(error, 'loadPokemon');
@@ -171,17 +162,11 @@ async function loadPokemon() {
 async function loadMorePokemon() {
     if (isLoading || isInSearchMode) return;
     
-    // Show loading button state
     showButtonState(true);
-    
     try {
-        // Wait for 2 seconds minimum
         await new Promise(resolve => setTimeout(resolve, 2000));
-        
-        // Load Pokemon
         await loadPokemon();
     } finally {
-        // Show normal button state
         showButtonState(false);
     }
 }
@@ -199,12 +184,10 @@ async function handleSearch() {
         resetToDefaultView();
         return;
     }
-    
     if (!isValidSearchTerm(searchTerm)) {
         showCustomModal('Please enter a valid search term (letters, numbers, or spaces).');
         return;
     }
-
     try {
         const pokemon = await searchPokemonByTerm(searchTerm);
         displaySearchResult(pokemon, searchTerm);
@@ -223,22 +206,18 @@ async function handleSearch() {
  */
 async function searchPokemonByFuzzyName(searchTerm, pokemonIds) {
     const matchingPokemon = [];
-    
-    // Search through all Pokemon in the provided IDs
+
     for (const pokemonId of pokemonIds) {
         try {
             const pokemon = await fetchPokemonById(pokemonId);
-            
-            // Check if Pokemon name contains the search term (case insensitive)
+
             if (pokemon.name.toLowerCase().includes(searchTerm.toLowerCase())) {
                 matchingPokemon.push(pokemon);
             }
         } catch (error) {
-            // Skip Pokemon that can't be fetched
             console.warn(`Could not fetch Pokemon ${pokemonId}:`, error);
         }
     }
-    
     if (matchingPokemon.length === 0) {
         throw new Error(`No Pokemon found matching "${searchTerm}"`);
     }
@@ -271,4 +250,151 @@ function getTypeColors() {
         steel: '#B8B8D0',
         fairy: '#EE99AC'
     };
+}
+
+/**
+ * Fetches species data for a Pokemon
+ * @async
+ * @param {number} id - Pokemon ID
+ * @returns {Promise<Object>} Species data object
+ */
+async function fetchSpeciesById(id) {
+    try {
+        const response = await fetch(`${API_BASE_URL}/pokemon-species/${id}`);
+        
+        if (!response.ok) {
+            throw new Error(`Species with ID ${id} not found`);
+        }  
+        const data = await response.json();
+        return data;
+    } catch (error) {
+        console.error('Error fetching species by ID:', error);
+        throw error;
+    }
+}
+
+/**
+ * Fetches evolution chain data
+ * @async
+ * @param {string} evolutionChainUrl - URL of the evolution chain
+ * @returns {Promise<Object>} Evolution chain data object
+ */
+async function fetchEvolutionChain(evolutionChainUrl) {
+    try {
+        const response = await fetch(evolutionChainUrl);
+        
+        if (!response.ok) {
+            throw new Error('Evolution chain not found');
+        }
+        const data = await response.json();
+        return data;
+    } catch (error) {
+        console.error('Error fetching evolution chain:', error);
+        throw error;
+    }
+}
+
+/**
+ * Extracts Pokemon ID from species URL
+ * @param {string} speciesUrl - Species URL
+ * @returns {number} Pokemon ID
+ */
+function extractPokemonIdFromUrl(speciesUrl) {
+    return speciesUrl.split('/').slice(-2, -1)[0];
+}
+
+/**
+ * Creates evolution data object
+ * @param {Object} pokemonData - Pokemon data
+ * @param {Array} evolutionDetails - Evolution details
+ * @returns {Object} Evolution data object
+ */
+function createEvolutionData(pokemonData, evolutionDetails) {
+    return {
+        pokemon: pokemonData,
+        evolutionDetails: evolutionDetails || []
+    };
+}
+
+/**
+ * Processes evolution chain recursively
+ * @async
+ * @param {Object} chain - Current chain link
+ * @param {Array<Object>} evolutionChain - Array to store evolution chain
+ * @returns {Promise<void>}
+ */
+async function processEvolutionChain(chain, evolutionChain) {
+    if (!chain) return;   
+    try {
+        const speciesUrl = chain.species.url;
+        const pokemonId = extractPokemonIdFromUrl(speciesUrl);
+        const pokemonData = await fetchPokemonById(pokemonId);
+        const evolutionData = createEvolutionData(pokemonData, chain.evolution_details);
+        
+        evolutionChain.push(evolutionData);
+        
+        for (const evolution of chain.evolves_to || []) {
+            await processEvolutionChain(evolution, evolutionChain);
+        }
+    } catch (error) {
+        console.error('Error processing evolution chain:', error);
+    }
+}
+
+/**
+ * Extracts evolution chain data and fetches Pokemon details
+ * @async
+ * @param {Object} pokemon - Pokemon data object
+ * @returns {Promise<Array<Object>>} Array of evolution chain Pokemon with details
+ */
+async function getEvolutionChain(pokemon) {
+    try {
+        const speciesData = await fetchSpeciesById(pokemon.id);
+        
+        if (!speciesData.evolution_chain?.url) {
+            return [];
+        }  
+        const evolutionChainData = await fetchEvolutionChain(speciesData.evolution_chain.url);
+        const evolutionChain = [];
+        const chain = evolutionChainData.chain;
+        
+        await processEvolutionChain(chain, evolutionChain);
+        return evolutionChain;
+    } catch (error) {
+        console.error('Error getting evolution chain:', error);
+        return [];
+    }
+}
+
+/**
+ * Loads and displays evolution chain for a Pokemon
+ * @async
+ * @param {Object} pokemon - Pokemon data object
+ * @returns {Promise<void>}
+ */
+async function loadEvolutionChain(pokemon) {
+    const loadingElement = document.getElementById('evolutionLoading');
+    const chainElement = document.getElementById('evolutionChain');
+    const errorElement = document.getElementById('evolutionError');
+    
+    if (!loadingElement || !chainElement || !errorElement) return;
+    
+    try {
+        showEvolutionLoading(loadingElement, chainElement, errorElement);
+        
+        const evolutionChain = await getEvolutionChain(pokemon);
+        
+        if (evolutionChain.length === 0) {
+            showEvolutionError(errorElement);
+            return;
+        }
+        const evolutionHTML = createEvolutionChainHTML(evolutionChain, pokemon);
+        showEvolutionContent(chainElement, evolutionHTML);
+        
+    } catch (error) {
+        console.error('Error loading evolution chain:', error);
+        showEvolutionError(errorElement);
+    } finally {
+        loadingElement.style.display = 'none';
+    }
 }

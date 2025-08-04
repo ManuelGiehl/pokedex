@@ -11,8 +11,7 @@ let currentOffset = 0;
 let limit = 20;
 /** @type {boolean} Indicates if Pokemon are currently loading */
 let isLoading = false;
-/** @type {number} Index of currently displayed Pokemon in modal */
-let currentPokemonIndex = 0;
+
 /** @type {boolean} Indicates if the app is in search mode */
 let isInSearchMode = false;
 /** @type {string} Currently selected region */
@@ -243,113 +242,16 @@ function displaySearchResult(pokemon, searchTerm) {
 function resetToDefaultView() {
     isInSearchMode = false;
     clearPokemonGrid();
-    currentOffset = 0;
-    pokemonList = [];
-    updateLoadMoreButton(false, false);
-    loadPokemon();
-}
-
-/**
- * Opens the large view for a Pokemon
- * @param {Object} pokemon - Pokemon data object
- * @returns {void}
- */
-function openLargeView(pokemon) {
-    currentPokemonIndex = pokemonList.findIndex(p => p.id === pokemon.id);
-    renderLargeView(pokemon);
-}
-
-/**
- * Renders the large view for a Pokemon
- * @param {Object} pokemon - Pokemon data object
- * @returns {void}
- */
-function renderLargeView(pokemon) {
-    // Create overlay
-    const overlay = document.createElement('div');
-    overlay.className = 'large-view-overlay';
-    overlay.id = 'largeViewOverlay';
     
-    overlay.innerHTML = createLargeViewTemplate(pokemon, getTypeColors());
-
-    // Close overlay when clicking outside
-    overlay.addEventListener('click', (e) => {
-        if (e.target === overlay) {
-            closeLargeView();
-        }
+    pokemonList.forEach(pokemon => {
+        renderPokemonCard(pokemon);
     });
-
-    document.body.appendChild(overlay);
-    document.body.style.overflow = 'hidden';
-}
-
-/**
- * Closes the large view
- * @returns {void}
- */
-function closeLargeView() {
-    const overlay = document.getElementById('largeViewOverlay');
-    if (overlay) {
-        overlay.remove();
-        document.body.style.overflow = '';
-        document.body.style.position = '';
+    const pokemonIds = getRegionPokemonIds();
+    if (currentOffset >= pokemonIds.length) {
+        updateLoadMoreButton(false, true); 
+    } else {
+        updateLoadMoreButton(false, false); 
     }
-}
-
-/**
- * Navigates between Pokemon in the large view with cyclic navigation
- * @param {number} direction - Direction (-1 for previous, 1 for next)
- * @returns {void}
- */
-function navigatePokemon(direction) {
-    let newIndex = currentPokemonIndex + direction;
-    
-    if (newIndex < 0) {
-        newIndex = pokemonList.length - 1;
-    } else if (newIndex >= pokemonList.length) {
-        newIndex = 0; 
-    }
-    
-    currentPokemonIndex = newIndex;
-    const overlay = document.getElementById('largeViewOverlay');
-    if (overlay) {
-        overlay.remove();
-        renderLargeView(pokemonList[currentPokemonIndex]);
-    }
-}
-
-/**
- * Shows a custom modal
- * @param {string} message - The message to display
- * @returns {void}
- */
-function showCustomModal(message) {
-    const modal = document.getElementById('customModal');
-    const modalMessage = document.getElementById('modalMessage');
-    
-    if (modal && modalMessage) {
-        modalMessage.textContent = message;
-        modal.style.display = 'flex';
-    }
-}
-
-/**
- * Closes the custom modal
- * @returns {void}
- */
-function closeCustomModal() {
-    const modal = document.getElementById('customModal');
-    if (modal) {
-        modal.style.display = 'none';
-    }
-}
-
-/**
- * Wrapper function for the X button in modal
- * @returns {void}
- */
-function closeLargeViewButton() {
-    closeLargeView();
 }
 
 /**
@@ -377,4 +279,41 @@ function updateLoadMoreButton(isLoading, hideCompletely = false) {
             showButtonState(isLoading);
         }
     }
+}
+
+/**
+ * Shows loading or normal state for the "Load More" button
+ * @param {boolean} isLoading - Whether to show loading state
+ */
+function showButtonState(isLoading) {
+    const loadMoreSection = document.querySelector('.load-more-section');
+    if (loadMoreSection) {
+        loadMoreSection.innerHTML = isLoading ? createLoadingButtonTemplate() : createLoadMoreButtonTemplate(false);
+        
+        if (!isLoading) {
+            const loadMoreBtn = document.getElementById('loadMoreBtn');
+            if (loadMoreBtn) {
+                loadMoreBtn.addEventListener('click', loadMorePokemon);
+            }
+        }
+    }
+}
+
+/**
+ * Shows an error message as notification
+ * @param {string} message - The error message to display
+ */
+function showError(message) {
+    const errorHTML = createErrorNotificationTemplate(message);
+    const tempDiv = document.createElement('div');
+    tempDiv.innerHTML = errorHTML;
+    const errorDiv = tempDiv.firstElementChild;
+    
+    document.body.appendChild(errorDiv);
+    
+    setTimeout(() => {
+        if (errorDiv && errorDiv.parentNode) {
+            errorDiv.remove();
+        }
+    }, 5000);
 }
