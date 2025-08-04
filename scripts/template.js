@@ -149,24 +149,6 @@ function createStatsTab(pokemon) {
 }
 
 /**
- * Creates the "Evolution" tab content
- * @param {Object} pokemon - Pokemon data object
- * @returns {string} HTML string for the Evolution tab
- */
-function createEvolutionTab(pokemon) {
-    return `<dl class="about-section">
-        <div class="about-item">
-            <dt class="about-label">Evolution Chain</dt>
-            <dd class="about-value">Coming Soon</dd>
-        </div>
-        <div class="about-item">
-            <dt class="about-label">Evolution Method</dt>
-            <dd class="about-value">Level Up</dd>
-        </div>
-    </dl>`;
-}
-
-/**
  * Creates the "Moves" tab content
  * @param {Object} pokemon - Pokemon data object
  * @returns {string} HTML string for the Moves tab
@@ -284,6 +266,14 @@ function switchTab(tabName, button) {
     document.querySelectorAll('.tab-panel').forEach(panel => panel.classList.remove('active'));
     button.classList.add('active');
     document.getElementById(tabName + '-tab').classList.add('active');
+    
+    // Load evolution chain when evolution tab is opened
+    if (tabName === 'evolution') {
+        const currentPokemon = getCurrentPokemon();
+        if (currentPokemon) {
+            loadEvolutionChain(currentPokemon);
+        }
+    }
 }
 
 /**
