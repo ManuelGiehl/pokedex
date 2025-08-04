@@ -297,19 +297,24 @@ function closeLargeView() {
 }
 
 /**
- * Navigates between Pokemon in the large view
+ * Navigates between Pokemon in the large view with cyclic navigation
  * @param {number} direction - Direction (-1 for previous, 1 for next)
  * @returns {void}
  */
 function navigatePokemon(direction) {
-    const newIndex = currentPokemonIndex + direction;
-    if (newIndex >= 0 && newIndex < pokemonList.length) {
-        currentPokemonIndex = newIndex;
-        const overlay = document.getElementById('largeViewOverlay');
-        if (overlay) {
-            overlay.remove();
-            renderLargeView(pokemonList[currentPokemonIndex]);
-        }
+    let newIndex = currentPokemonIndex + direction;
+    
+    if (newIndex < 0) {
+        newIndex = pokemonList.length - 1;
+    } else if (newIndex >= pokemonList.length) {
+        newIndex = 0; 
+    }
+    
+    currentPokemonIndex = newIndex;
+    const overlay = document.getElementById('largeViewOverlay');
+    if (overlay) {
+        overlay.remove();
+        renderLargeView(pokemonList[currentPokemonIndex]);
     }
 }
 
